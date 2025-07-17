@@ -1,6 +1,7 @@
 import { GroundingClient, type LLMClient } from '@/ai/types';
 import { Agent, AgentOptions } from "@/agent";
 import { BrowserConnector, BrowserConnectorOptions } from "@/connectors/browserConnector";
+import { DesktopConnectorOptions } from "@/connectors/desktopConnector";
 import { completeClaudeCodeAuthFlow } from './claudeCode';
 
 function cleanNestedObject(obj: object): object {
@@ -266,5 +267,39 @@ export function buildDefaultBrowserAgentOptions(
     return {
         agentOptions: {...agentOptions, llm: llms },
         browserOptions: {...browserOptions, grounding: grounding ?? undefined, virtualScreenDimensions: virtualScreenDimensions ?? undefined }
+    };
+}
+
+export function buildDefaultDesktopAgentOptions(
+    { agentOptions, desktopOptions }: { agentOptions: AgentOptions, desktopOptions: DesktopConnectorOptions }
+): { agentOptions: AgentOptions, desktopOptions: DesktopConnectorOptions } {
+    /**
+     * Given any provided options for agent or desktop connector, fill out additional key fields using environment,
+     * or any model-specific constraints
+     */
+    const envLlm = tryDeriveUIGroundedClient();
+    
+    let llms: LLMClient[] = agentOptions.llm ? (Array.isArray(agentOptions.llm) ? agentOptions.llm : [agentOptions.llm]) : (envLlm ? [envLlm] : []);
+    const grounding = desktopOptions.grounding;
+    
+    if (llms.length == 0) {
+        throw new Error("No LLM configured or available from environment. Set environment variable ANTHROPIC_API_KEY and try again. See https://docs.magnitude.run/customizing/llm-configuration for details");
+    }
+
+    // Set reasonable temp if not provided
+    let virtualScreenDimensions = null;
+    for (const llm of llms) {
+        let llmOptions: LLMClient['options'] = { temperature: DEFAULT_BROWSER_AGENT_TEMP, ...(llm?.options ?? {}) };
+        llm.options = llmOptions;
+
+        if (isClaude(llm)) {
+            // Claude grounding works best on 1024x768 screenshots for desktop too
+            virtualScreenDimensions = { width: 1024, height: 768 };
+        }
+    }
+
+    return {
+        agentOptions: {...agentOptions, llm: llms },
+        desktopOptions: {...desktopOptions, grounding: grounding ?? undefined, virtualScreenDimensions: virtualScreenDimensions ?? undefined }
     };
 }

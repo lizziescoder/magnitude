@@ -17,4 +17,5 @@ export interface AgentConnector {
     getInstructions?(): Promise<void | string>;
 }
 
-//export { BrowserConnector, BrowserConnectorOptions } from './browserConnector';
+export { BrowserConnector } from './browserConnector';
+export { DesktopConnector } from './desktopConnector';

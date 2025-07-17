@@ -1,25 +1,36 @@
 process.env.BAML_LOG='off';
 import { setLogLevel } from '@/ai/baml_client/config';
 
-export { Agent } from "@/agent";
-export { createAction } from '@/actions';
-export { BrowserAgent, startBrowserAgent } from '@/agent/browserAgent';
-//export { Magnus } from "@/agent/magnus";
-//export type { AgentOptions as TestCaseAgentOptions } from "@/agent";
-export * from "@/agent";
+// Export core classes
+export { Agent } from './agent';
+export type { AgentOptions, ActOptions } from './agent';
+export { BrowserAgent, startBrowserAgent } from './agent/browserAgent';
+export { DesktopAgent, startDesktopAgent } from './agent/desktopAgent';
+
+// Export connectors
+export type { AgentConnector } from './connectors';
+export { BrowserConnector } from './connectors/browserConnector';
+export type { BrowserConnectorOptions } from './connectors/browserConnector';
+export { DesktopConnector } from './connectors/desktopConnector';
+export type { DesktopConnectorOptions } from './connectors/desktopConnector';
+
+// Export desktop components
+export { DesktopHarness } from './desktop/harness';
+export type { DesktopHarnessOptions } from './desktop/harness';
+
+// Re-export other existing exports
+export * from './types';
+export * from './memory';
+export * from './actions';
 export * from "@/web/harness";
-export * from "@/actions";
-export * from "@/connectors";
 export * from "@/web/browserProvider";
-export * from "@/connectors/browserConnector";
 export * from "@/agent/errors";
-export * from "@/types";
 export * from "@/ai/types";
 export * from "@/web/types";
 export * from "@/actions/types";
 export * from '@/common';
 export * from "@/telemetry";
-export { buildDefaultBrowserAgentOptions } from "@/ai/util";
+export { buildDefaultBrowserAgentOptions, buildDefaultDesktopAgentOptions } from "@/ai/util";
 export { logger } from './logger';
 //export { ModelUsage } from '@/ai/modelHarness';
 
